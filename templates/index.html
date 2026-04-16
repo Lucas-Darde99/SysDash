@@ -2,157 +2,537 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SysDash</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysDash Pro</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #0f172a;
+            background: #06090f;
             color: #e2e8f0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 40px 20px;
         }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
         h1 {
-            font-size: 2rem;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
         }
-        .subtitle { color: #64748b; margin-bottom: 40px; font-size: 0.9rem; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            width: 100%;
-            max-width: 900px;
+
+        .subtitle {
+            color: #475569;
+            font-size: 0.9rem;
+            margin-top: 6px;
         }
-        .card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-        }
-        .card-label {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
-        }
-        .card-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            font-variant-numeric: tabular-nums;
-        }
-        .card-detail { font-size: 0.85rem; color: #64748b; margin-top: 8px; }
-        .bar {
-            width: 100%;
-            height: 8px;
-            background: #0f172a;
-            border-radius: 4px;
+
+        /* ── Health Banner ── */
+        .health-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #1e3a5f;
+            border-radius: 20px;
+            padding: 32px 40px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+            position: relative;
             overflow: hidden;
         }
-        .bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.6s ease, background 0.6s ease;
+
+        .health-banner::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 1px;
+            background: linear-gradient(135deg, #3b82f620, #8b5cf620, #f472b620);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
-        .cpu .bar-fill    { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
-        .ram .bar-fill    { background: linear-gradient(90deg, #a78bfa, #8b5cf6); }
-        .temp .bar-fill   { background: linear-gradient(90deg, #34d399, #10b981); }
-        .alert .bar-fill  { background: linear-gradient(90deg, #f87171, #ef4444) !important; }
-        .alert .card-value { color: #f87171; }
-        .controls { margin: 32px 0 8px; display: flex; align-items: center; gap: 16px; }
+
+        .health-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .health-ring {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .health-ring svg {
+            transform: rotate(-90deg);
+            width: 100px;
+            height: 100px;
+        }
+
+        .health-ring .ring-bg {
+            fill: none;
+            stroke: #1e293b;
+            stroke-width: 8;
+        }
+
+        .health-ring .ring-fill {
+            fill: none;
+            stroke: url(#health-gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251;
+            stroke-dashoffset: 251;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .health-score-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .health-info h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .health-label {
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+
+        .health-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .uptime-badge {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 12px 20px;
+            text-align: center;
+        }
+
+        .uptime-badge .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .uptime-badge .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        /* ── Controls ── */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
         button {
-            background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             color: white;
             border: none;
-            padding: 12px 28px;
-            border-radius: 10px;
-            font-size: 0.95rem;
+            padding: 11px 26px;
+            border-radius: 12px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-            box-shadow: 0 4px 16px rgba(96, 165, 250, 0.25);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
         }
-        button:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(96, 165, 250, 0.35); }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.35);
+        }
+
         button:active { transform: translateY(0); }
         button:disabled { opacity: 0.5; cursor: wait; }
-        .timestamp { color: #64748b; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+
+        .auto-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .auto-toggle input[type="checkbox"] {
+            accent-color: #8b5cf6;
+            width: 16px;
+            height: 16px;
+        }
+
+        .timestamp {
+            color: #475569;
+            font-size: 0.82rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+            .health-banner { flex-direction: column; text-align: center; }
+            .health-right { justify-content: center; }
+        }
+
+        @media (max-width: 500px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #334155;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-label {
+            font-size: 0.78rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .card-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 14px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .card-value .unit {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #475569;
+            margin-left: 2px;
+        }
+
+        .card-detail {
+            font-size: 0.8rem;
+            color: #475569;
+            margin-top: 10px;
+        }
+
+        /* ── Progress bars ── */
+        .bar-container {
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 0;
+        }
+
+        /* ── Color themes ── */
+        .card.cpu .card-icon { background: #1e3a5f; color: #60a5fa; }
+        .card.cpu .bar-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .card.cpu .card-value { color: #60a5fa; }
+
+        .card.ram .card-icon { background: #2e1065; color: #a78bfa; }
+        .card.ram .bar-fill { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+        .card.ram .card-value { color: #a78bfa; }
+
+        .card.temp .card-icon { background: #064e3b; color: #34d399; }
+        .card.temp .bar-fill { background: linear-gradient(90deg, #059669, #34d399); }
+        .card.temp .card-value { color: #34d399; }
+
+        .card.disk .card-icon { background: #422006; color: #fb923c; }
+        .card.disk .bar-fill { background: linear-gradient(90deg, #ea580c, #fb923c); }
+        .card.disk .card-value { color: #fb923c; }
+
+        .card.battery .card-icon { background: #1a2e05; color: #a3e635; }
+        .card.battery .bar-fill { background: linear-gradient(90deg, #65a30d, #a3e635); }
+        .card.battery .card-value { color: #a3e635; }
+
+        .card.network .card-icon { background: #4a1d6a; color: #e879f9; }
+        .card.network .card-value { color: #e879f9; }
+
+        /* ── Alert state ── */
+        .card.alert { border-color: #7f1d1d; }
+        .card.alert .bar-fill { background: linear-gradient(90deg, #dc2626, #f87171) !important; }
+        .card.alert .card-value { color: #f87171 !important; }
+
+        /* ── Pulse animation ── */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .loading .card-value { animation: pulse 1.2s ease-in-out infinite; }
     </style>
 </head>
 <body>
-    <h1>SysDash</h1>
-    <p class="subtitle">Surveillance système · mise à jour manuelle</p>
+    <div class="container">
+        <header>
+            <h1>SysDash Pro</h1>
+            <p class="subtitle">Diagnostic systeme en temps reel</p>
+        </header>
 
-    <div class="controls">
-        <button id="refresh-btn" onclick="refresh()">Actualiser</button>
-        <span class="timestamp" id="last-update">Aucune mesure</span>
-    </div>
-
-    <div class="grid">
-        <div class="card cpu" id="cpu-card">
-            <div class="card-label">Processeur</div>
-            <div class="card-value"><span id="cpu-val">--</span><span style="font-size:1.2rem;color:#64748b">%</span></div>
-            <div class="bar"><div class="bar-fill" id="cpu-bar" style="width:0%"></div></div>
-            <div class="card-detail">Seuil d'alerte : 80 %</div>
+        <!-- Health Banner -->
+        <div class="health-banner" id="health-banner">
+            <svg width="0" height="0"><defs>
+                <linearGradient id="health-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#3b82f6"/>
+                    <stop offset="50%" stop-color="#8b5cf6"/>
+                    <stop offset="100%" stop-color="#f472b6"/>
+                </linearGradient>
+            </defs></svg>
+            <div class="health-left">
+                <div class="health-ring">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+                        <circle class="ring-fill" id="health-ring" cx="50" cy="50" r="40"/>
+                    </svg>
+                    <div class="health-score-text" id="health-score">--</div>
+                </div>
+                <div class="health-info">
+                    <h2>Sante du Systeme</h2>
+                    <div class="health-label" id="health-label">En attente...</div>
+                </div>
+            </div>
+            <div class="health-right">
+                <div class="uptime-badge">
+                    <div class="label">Uptime</div>
+                    <div class="value" id="uptime-val">--</div>
+                </div>
+            </div>
         </div>
 
-        <div class="card ram">
-            <div class="card-label">Mémoire vive</div>
-            <div class="card-value"><span id="ram-val">--</span><span style="font-size:1.2rem;color:#64748b">%</span></div>
-            <div class="bar"><div class="bar-fill" id="ram-bar" style="width:0%"></div></div>
-            <div class="card-detail" id="ram-detail">-- Go / -- Go</div>
+        <!-- Controls -->
+        <div class="controls">
+            <div class="controls-left">
+                <button id="refresh-btn" onclick="refresh()">Actualiser</button>
+                <label class="auto-toggle">
+                    <input type="checkbox" id="auto-refresh" onchange="toggleAuto()">
+                    Auto (5s)
+                </label>
+            </div>
+            <span class="timestamp" id="last-update">Aucune mesure</span>
         </div>
 
-        <div class="card temp">
-            <div class="card-label">Température CPU</div>
-            <div class="card-value" id="temp-val">--</div>
-            <div class="bar"><div class="bar-fill" id="temp-bar" style="width:0%"></div></div>
-            <div class="card-detail">Plage normale : 30–70 °C</div>
+        <!-- Metric Cards -->
+        <div class="grid">
+            <div class="card cpu loading" id="cpu-card">
+                <div class="card-header">
+                    <span class="card-label">Processeur</span>
+                    <div class="card-icon">C</div>
+                </div>
+                <div class="card-value"><span id="cpu-val">--</span><span class="unit">%</span></div>
+                <div class="bar-container"><div class="bar-fill" id="cpu-bar" style="width:0%"></div></div>
+                <div class="card-detail">Seuil d'alerte : 80%</div>
+            </div>
+
+            <div class="card ram loading">
+                <div class="card-header">
+                    <span class="card-label">Memoire vive</span>
+                    <div class="card-icon">R</div>
+                </div>
+                <div class="card-value"><span id="ram-val">--</span><span class="unit">%</span></div>
+                <div class="bar-container"><div class="bar-fill" id="ram-bar" style="width:0%"></div></div>
+                <div class="card-detail" id="ram-detail">-- Go / -- Go</div>
+            </div>
+
+            <div class="card temp loading">
+                <div class="card-header">
+                    <span class="card-label">Temperature CPU</span>
+                    <div class="card-icon">T</div>
+                </div>
+                <div class="card-value" id="temp-val">--</div>
+                <div class="bar-container"><div class="bar-fill" id="temp-bar" style="width:0%"></div></div>
+                <div class="card-detail">Plage normale : 30 - 70 C</div>
+            </div>
+
+            <div class="card disk loading">
+                <div class="card-header">
+                    <span class="card-label">Stockage</span>
+                    <div class="card-icon">D</div>
+                </div>
+                <div class="card-value"><span id="disk-val">--</span><span class="unit">%</span></div>
+                <div class="bar-container"><div class="bar-fill" id="disk-bar" style="width:0%"></div></div>
+                <div class="card-detail" id="disk-detail">-- Go / -- Go</div>
+            </div>
+
+            <div class="card battery loading">
+                <div class="card-header">
+                    <span class="card-label">Batterie</span>
+                    <div class="card-icon">B</div>
+                </div>
+                <div class="card-value"><span id="bat-val">--</span><span class="unit">%</span></div>
+                <div class="bar-container"><div class="bar-fill" id="bat-bar" style="width:0%"></div></div>
+                <div class="card-detail" id="bat-detail">--</div>
+            </div>
+
+            <div class="card network loading">
+                <div class="card-header">
+                    <span class="card-label">Reseau</span>
+                    <div class="card-icon">N</div>
+                </div>
+                <div class="card-value" style="font-size:1.4rem; line-height:1.6" id="net-val">
+                    TX: -- Mo<br>RX: -- Mo
+                </div>
+                <div class="card-detail">Total depuis le demarrage</div>
+            </div>
         </div>
     </div>
 
     <script>
+        let autoTimer = null;
+        const CIRC = 2 * Math.PI * 40;
+
         async function refresh() {
             const btn = document.getElementById("refresh-btn");
             btn.disabled = true;
             btn.textContent = "Chargement...";
             try {
                 const res = await fetch("/api/stats");
-                const data = await res.json();
+                const d = await res.json();
 
-                document.getElementById("cpu-val").textContent = data.cpu_percent.toFixed(1);
-                document.getElementById("cpu-bar").style.width = data.cpu_percent + "%";
-                document.getElementById("cpu-card").classList.toggle("alert", data.cpu_percent > 80);
+                document.querySelectorAll(".card").forEach(c => c.classList.remove("loading"));
 
-                document.getElementById("ram-val").textContent = data.ram_percent.toFixed(1);
-                document.getElementById("ram-bar").style.width = data.ram_percent + "%";
+                setValue("cpu-val", d.cpu_percent.toFixed(1));
+                setBar("cpu-bar", d.cpu_percent);
+                document.getElementById("cpu-card").classList.toggle("alert", d.cpu_percent > 80);
+
+                setValue("ram-val", d.ram_percent.toFixed(1));
+                setBar("ram-bar", d.ram_percent);
                 document.getElementById("ram-detail").textContent =
-                    `${data.ram_used_gb} Go / ${data.ram_total_gb} Go`;
+                    d.ram_used_gb + " Go / " + d.ram_total_gb + " Go";
 
-                document.getElementById("temp-val").textContent = data.cpu_temp;
-                const tempNum = parseFloat(data.cpu_temp);
-                if (!isNaN(tempNum)) {
-                    const pct = Math.min(100, (tempNum / 100) * 100);
-                    document.getElementById("temp-bar").style.width = pct + "%";
+                document.getElementById("temp-val").innerHTML =
+                    d.cpu_temp === "N/A" ? "N/A" : d.cpu_temp;
+                const tn = parseFloat(d.cpu_temp);
+                setBar("temp-bar", isNaN(tn) ? 0 : Math.min(100, tn));
+
+                setValue("disk-val", d.disk_percent.toFixed(1));
+                setBar("disk-bar", d.disk_percent);
+                document.getElementById("disk-detail").textContent =
+                    d.disk_used_gb + " Go / " + d.disk_total_gb + " Go";
+
+                if (d.battery_percent < 0) {
+                    setValue("bat-val", "N/A");
+                    setBar("bat-bar", 0);
+                    document.getElementById("bat-detail").textContent = "Desktop";
+                } else {
+                    setValue("bat-val", d.battery_percent.toFixed(0));
+                    setBar("bat-bar", d.battery_percent);
+                    document.getElementById("bat-detail").textContent =
+                        d.battery_plugged ? "Secteur" : "Batterie";
                 }
+
+                document.getElementById("net-val").innerHTML =
+                    "TX: " + d.net_sent_mb + " Mo<br>RX: " + d.net_recv_mb + " Mo";
+
+                document.getElementById("uptime-val").textContent = d.uptime;
+
+                document.getElementById("health-score").textContent = d.health_score;
+                document.getElementById("health-label").textContent =
+                    d.health_score + "/100 — " + d.health_label;
+                const offset = CIRC - (CIRC * d.health_score / 100);
+                document.getElementById("health-ring").style.strokeDashoffset = offset;
 
                 const now = new Date();
                 document.getElementById("last-update").textContent =
-                    "Dernière mesure : " + now.toLocaleTimeString("fr-FR");
+                    "Derniere mesure : " + now.toLocaleTimeString("fr-FR");
             } catch (e) {
                 console.error(e);
-                document.getElementById("last-update").textContent = "Erreur lors de la mesure";
+                document.getElementById("last-update").textContent = "Erreur de connexion";
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Actualiser";
+            }
+        }
+
+        function setValue(id, val) {
+            document.getElementById(id).textContent = val;
+        }
+
+        function setBar(id, pct) {
+            document.getElementById(id).style.width = Math.min(100, Math.max(0, pct)) + "%";
+        }
+
+        function toggleAuto() {
+            if (document.getElementById("auto-refresh").checked) {
+                refresh();
+                autoTimer = setInterval(refresh, 5000);
+            } else {
+                clearInterval(autoTimer);
+                autoTimer = null;
             }
         }
     </script>
